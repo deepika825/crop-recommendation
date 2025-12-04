@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriAI - Smart Crop Recommendation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-green: #2e7d32;
+            --dark-green: #1b5e20;
+            --light-green: #c8e6c9;
+            --accent-yellow: #ffd54f;
+            --accent-orange: #ff9800;
+            --text-dark: #333;
+            --text-light: #fff;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-dark);
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2000&q=80') 
+                        no-repeat center center fixed;
+            background-size: cover;
+            line-height: 1.6;
+            position: relative;
+            min-height: 100vh;
+        }
+        
+        /* Copyright Protection */
+        .copyright-protection {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+        
+        .copyright-protection a {
+            color: var(--accent-yellow);
+            text-decoration: none;
+        }
+        
+        /* Disable text selection */
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Disable right-click */
+        .no-context {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: var(--text-light);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        .logo h1 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+        
+        nav { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: var(--transition);
+        }
+        
+        nav a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .login-link {
+            background: var(--text-light);
+            color: var(--primary-green);
+            border: 2px solid var(--text-light);
+            margin-left: 1rem;
+        }
+        
+        .login-link:hover {
+            background: transparent;
+            color: var(--text-light);
+        }
+        
+        .hero {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(46, 125, 50, 0.7);
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+        
+        .hero h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 0 2rem;
+            max-width: 1400px;
+            margin: 0 auto 2rem;
+        }
+        
+        .dashboard-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: var(--transition);
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .dashboard-card i {
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+        
+        .dashboard-card h3 {
+            color: var(--dark-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        .dashboard-card p {
+            color: #666;
+        }
+        
+        .content {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 2rem 2rem;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .panel {
+            flex: 1;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow-y: auto;
+            max-height: 70vh;
+        }
+        
+        .panel h2 {
+            margin-top: 0;
+            color: var(--primary-green);
+            border-bottom: 2px solid var(--light-green);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .panel h2 i {
+            color: var(--accent-orange);
+        }
+        
+        .crop-card, .trend-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid var(--primary-green);
+            transition: var(--transition);
+        }
+        
+        .crop-card:hover, .trend-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .crop-card h3, .trend-card h3 {
+            color: var(--dark-green);
+            margin-bottom: 0.5rem;
+        }
+        
+        .crop-meta, .trend-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .crop-meta span {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .trend-up {
+            color: #4caf50;
+            font-weight: bold;
+        }
+        
+        .trend-down {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .trend-stable {
+            color: #ff9800;
+            font-weight: bold;
+        }
+        
+        .trend-meta span:first-child {
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 1rem;
+            color: #666;
+        }
+        
+        .loading i {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-green);
+        }
+        
+        .api-status {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        .status-online {
+            color: #4caf50;
+        }
+        
+        .status-offline {
+            color: #f44336;
+        }
+        
+        footer {
+            background: linear-gradient(135deg, var(--primary-green), var(--dark-green));
+            color: var(--text-light);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        
+        .footer-section {
+            flex: 1;
+            padding: 0 1rem;
+        }
+        
+        .footer-section h3 {
+            margin-bottom: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 0.5rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section a {
+            color: var(--light-green);
+            text-decoration: none;
+        }
+        
+        .footer-section a:hover {
+            text-decoration: underline;
+        }
+        
+        .copyright {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .content {
+                flex-direction: column;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body class="no-select no-context">
+    <!-- Copyright Protection Notice -->
+    <div class="copyright-protection">
+        © 2025 AgriAI. All Rights Reserved.
+    </div>
+
+    <header>
+        <div class="logo">
+            <i class="fas fa-seedling"></i>
+            <h1>AgriAI</h1>
+        </div>
+        <nav>
+            <a href="home.html">Home</a>
+            <a href="about.html">About</a>
+            <a href="contacts.html">Contacts</a>
+            <a href="login.html" class="login-link">Login</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h2>Smart Crop Recommendations</h2>
+        <p>Leverage AI-powered insights to optimize your farming decisions based on seasonal trends and market dynamics</p>
+    </section>
+
+    <div class="dashboard">
+        <div class="dashboard-card">
+            <i class="fas fa-cloud-sun"></i>
+            <h3>Weather Forecast</h3>
+            <p>7-day weather prediction for optimal planting</p>
+        </div>
+        <div class="dashboard-card">
+            <i class="fas fa-tractor"></i>
+            <h3>Soil Analysis</h3>
+            <p>Get detailed soil health insights</p>
+        </div>
+        <div class="dashboard-card">
+            <i class="fas fa-chart-line"></i>
+            <h3>Yield Prediction</h3>
+            <p>AI-powered crop yield estimates</p>
+        </div>
+    </div>
+
+    <div class="content">
+        <!-- Left panel: seasonal crops -->
+        <div class="panel" id="seasonalCrops">
+            <h2><i class="fas fa-calendar-alt"></i> Seasonal Trendy Crops</h2>
+            <div id="seasonalList">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading seasonal crop data...</p>
+                </div>
+            </div>
+            <div class="api-status">
+                <span>Data Source: AgriAI Seasonal API</span>
+                <span class="status-indicator"><i class="fas fa-circle status-online"></i> Online</span>
+            </div>
+        </div>
+
+        <!-- Right panel: market trends -->
+        <div class="panel" id="marketTrends">
+            <h2><i class="fas fa-chart-bar"></i> Market Trends (Nearby & Global)</h2>
+            <div id="marketList">
+                <div class="loading">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Loading market trends...</p>
+                </div>
+            </div>
+            <div class="api-status">
+                <span>Data Source: AgriAI Market API</span>
+                <span class="status-indicator"><i class="fas fa-circle status-online"></i> Online</span>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="home.html">Home</a></li>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="contacts.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="blog.html">Agricultural Blog</a></li>
+                    <li><a href="guides.html">Farming Guides</a></li>
+                    <li><a href="market.html">Market Analysis</a></li>
+                    <li><a href="tools.html">Farming Tools</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Info</h3>
+                <ul>
+                    <li><i class="fas fa-envelope"></i> ghoshidipika9@gmail.com</li>
+                    <li><i class="fas fa-phone"></i> 9630738644</li>
+                    <li><i class="fas fa-map-marker-alt"></i> Bhopal, India</li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+
+        document.addEventListener('keydown', function(e) {
+            // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') || 
+                (e.ctrlKey && e.shiftKey && e.key === 'J') || 
+                (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                alert('Developer tools are disabled. This content is protected by copyright.');
+            }
+        });
+
+        // API Integration for Seasonal Crops and Market Trends
+        const SEASONAL_API_URL = 'https://api.agriai.com/seasonal-crops';
+        const MARKET_API_URL = 'https://api.agriai.com/market-trends';
+        
+        // Mock API responses for demonstration
+        const mockSeasonalData = [
+            {
+                name: "Wheat",
+                season: "Winter",
+                description: "Optimal planting period: October-November. Requires well-drained loamy soil.",
+                temperature: "10-25°C",
+                water: "Moderate",
+                region: "Northern Plains",
+                yield: "High"
+            },
+            {
+                name: "Rice",
+                season: "Monsoon",
+                description: "Best planted during monsoon season. Requires flooded fields for growth.",
+                temperature: "20-35°C",
+                water: "High",
+                region: "Coastal Areas",
+                yield: "Very High"
+            },
+            {
+                name: "Maize",
+                season: "Summer",
+                description: "Thrives in warm conditions. Plant after last frost for best yield.",
+                temperature: "18-27°C",
+                water: "Moderate",
+                region: "Midwest",
+                yield: "Medium"
+            },
+            {
+                name: "Soybean",
+                season: "Spring",
+                description: "Plant when soil temperature reaches 10°C. Good for crop rotation.",
+                temperature: "15-30°C",
+                water: "Moderate",
+                region: "Multiple Regions",
+                yield: "High"
+            },
+            {
+                name: "Cotton",
+                season: "Summer",
+                description: "Requires long, warm growing season. Sensitive to frost.",
+                temperature: "21-30°C",
+                water: "Low to Moderate",
+                region: "Southern Plains",
+                yield: "Medium"
+            }
+        ];
+        
+        const mockMarketData = [
+            {
+                commodity: "Soybean",
+                trend: "up",
+                change: 12.5,
+                description: "Global demand increasing due to biofuel production. Expected to continue upward trend for next quarter.",
+                region: "Global",
+                timeframe: "Next Quarter"
+            },
+            {
+                commodity: "Pulses",
+                trend: "up",
+                change: 8.3,
+                description: "Increased domestic consumption driving prices. Good opportunity for local farmers.",
+                region: "Regional",
+                timeframe: "Current Month"
+            },
+            {
+                commodity: "Cotton",
+                trend: "stable",
+                change: 0,
+                description: "International buyers seeking high-quality cotton. Export prices favorable.",
+                region: "Global",
+                timeframe: "Next 2 Months"
+            },
+            {
+                commodity: "Wheat",
+                trend: "down",
+                change: 5.2,
+                description: "Recent harvest surplus causing temporary price dip. Expected to normalize in 4-6 weeks.",
+                region: "Regional",
+                timeframe: "4-6 Weeks"
+            },
+            {
+                commodity: "Corn",
+                trend: "up",
+                change: 6.7,
+                description: "Increased demand from ethanol producers driving prices upward.",
+                region: "National",
+                timeframe: "Next Month"
+            }
+        ];
+        
+        // Function to fetch seasonal crop data from API
+        async function loadSeasonalCrops() {
+            try {
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                const data = mockSeasonalData;
+                
+                const seasonalList = document.getElementById('seasonalList');
+                seasonalList.innerHTML = '';
+                
+                data.forEach(crop => {
+                    const cropCard = document.createElement('div');
+                    cropCard.className = 'crop-card';
+                    cropCard.innerHTML = `
+                        <h3>${crop.name} (${crop.season})</h3>
+                        <p>${crop.description}</p>
+                        <div class="crop-meta">
+                            <span><i class="fas fa-temperature-low"></i> ${crop.temperature}</span>
+                            <span><i class="fas fa-tint"></i> ${crop.water} water</span>
+                            <span><i class="fas fa-map-marker-alt"></i> ${crop.region}</span>
+                        </div>
+                    `;
+                    seasonalList.appendChild(cropCard);
+                });
+            } catch (error) {
+                console.error('Error loading seasonal crops:', error);
+                document.getElementById('seasonalList').innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load seasonal crop data. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Function to fetch market trends from API
+        async function loadMarketTrends() {
+            try {
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                const data = mockMarketData;
+                
+                const marketList = document.getElementById('marketList');
+                marketList.innerHTML = '';
+                
+                data.forEach(trend => {
+                    const trendCard = document.createElement('div');
+                    trendCard.className = 'trend-card';
+                    
+                    let trendClass, trendIcon;
+                    if (trend.trend === 'up') {
+                        trendClass = 'trend-up';
+                        trendIcon = '<i class="fas fa-arrow-up"></i>';
+                    } else if (trend.trend === 'down') {
+                        trendClass = 'trend-down';
+                        trendIcon = '<i class="fas fa-arrow-down"></i>';
+                    } else {
+                        trendClass = 'trend-stable';
+                        trendIcon = '<i class="fas fa-minus"></i>';
+                    }
+                    
+                    trendCard.innerHTML = `
+                        <h3>${trend.commodity} Prices ${trend.trend === 'stable' ? 'Stable' : trend.trend === 'up' ? 'Rising' : 'Falling'}</h3>
+                        <p>${trend.description}</p>
+                        <div class="trend-meta">
+                            <span><i class="fas fa-${trend.region === 'Global' ? 'globe-americas' : 'map-marker-alt'}"></i> ${trend.region}</span>
+                            <span class="${trendClass}">${trendIcon} ${trend.trend !== 'stable' ? Math.abs(trend.change) + '%' : 'Stable'}</span>
+                        </div>
+                    `;
+                    marketList.appendChild(trendCard);
+                });
+            } catch (error) {
+                console.error('Error loading market trends:', error);
+                document.getElementById('marketList').innerHTML = `
+                    <div class="loading">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Failed to load market trends. Please try again later.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Function to refresh data
+        function refreshData() {
+            loadSeasonalCrops();
+            loadMarketTrends();
+        }
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSeasonalCrops();
+            loadMarketTrends();
+            
+            // Set up auto-refresh every 5 minutes
+            setInterval(refreshData, 300000);
+        });
+    </script>
+</body>
+</html>
