@@ -5,9 +5,115 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgriAI - Register</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Load Supabase JS from CDN -->
+    <!-- Load Supabase JS from CDN FIRST -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="register-card">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <h1>AgriAI</h1>
+            </div>
+            
+            <div class="form-header">
+                <h2>Create Account</h2>
+                <p>Join AgriAI to get smart crop recommendations</p>
+            </div>
+            
+            <div class="connection-error" id="connectionError">
+                <!-- Connection error messages will appear here -->
+            </div>
+            
+            <div class="success-message" id="successMessage">
+                <i class="fas fa-check-circle"></i> Registration successful! Redirecting...
+            </div>
+            
+            <form id="registrationForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="fullName" placeholder="Enter your full name" required>
+                    </div>
+                    <div class="error-message" id="nameError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="error-message" id="emailError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-phone"></i>
+                        <input type="tel" id="phone" placeholder="Enter 10-digit phone number" required>
+                    </div>
+                    <div class="error-message" id="phoneError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" placeholder="Create a password" required>
+                    </div>
+                    <div class="error-message" id="passwordError"></div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-bar">
+                            <div class="strength-bar-fill" id="strengthBar"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText"></div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+                    </div>
+                    <div class="error-message" id="confirmPasswordError"></div>
+                </div>
+                
+                <div class="terms-group">
+                    <input type="checkbox" id="termsAgree" required>
+                    <label for="termsAgree">
+                        I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+                    </label>
+                </div>
+                <div class="error-message" id="termsError">Please accept the terms and conditions</div>
+                
+                <div class="loading-spinner" id="loadingSpinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Creating your account...</p>
+                </div>
+                
+                <button type="submit" class="btn" id="registerBtn">
+                    Create Account
+                </button>
+                
+                <div class="login-link">
+                    Already have an account? <a href="login.html">Login here</a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="copyright">
+            © 2025 AgriAI. All Rights Reserved.
+        </div>
+    </div>
+
+    <!-- Include Supabase config AFTER the CDN -->
+    <script src="supabase-config.js"></script>
+    
     <style>
+        /* ALL YOUR CSS STYLES HERE - KEEP THEM EXACTLY AS YOU HAD THEM */
         :root {
             --primary-green: #2e7d32;
             --dark-green: #1b5e20;
@@ -312,152 +418,6 @@
             }
         }
     </style>
-</head>
-<body>
-    <div class="container">
-        <div class="register-card">
-            <div class="logo">
-                <i class="fas fa-seedling"></i>
-                <h1>AgriAI</h1>
-            </div>
-            
-            <div class="form-header">
-                <h2>Create Account</h2>
-                <p>Join AgriAI to get smart crop recommendations</p>
-            </div>
-            
-            <div class="connection-error" id="connectionError">
-                <!-- Connection error messages will appear here -->
-            </div>
-            
-            <div class="success-message" id="successMessage">
-                <i class="fas fa-check-circle"></i> Registration successful! Redirecting...
-            </div>
-            
-            <form id="registrationForm">
-                <div class="form-group">
-                    <label for="fullName">Full Name *</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-user"></i>
-                        <input type="text" id="fullName" placeholder="Enter your full name" required>
-                    </div>
-                    <div class="error-message" id="nameError"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email Address *</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-envelope"></i>
-                        <input type="email" id="email" placeholder="Enter your email" required>
-                    </div>
-                    <div class="error-message" id="emailError"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone">Phone Number *</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-phone"></i>
-                        <input type="tel" id="phone" placeholder="Enter 10-digit phone number" required>
-                    </div>
-                    <div class="error-message" id="phoneError"></div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">Password *</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="password" placeholder="Create a password" required>
-                    </div>
-                    <div class="error-message" id="passwordError"></div>
-                    <div class="password-strength" id="passwordStrength">
-                        <div class="strength-bar">
-                            <div class="strength-bar-fill" id="strengthBar"></div>
-                        </div>
-                        <div class="strength-text" id="strengthText"></div>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="confirmPassword">Confirm Password *</label>
-                    <div class="input-with-icon">
-                        <i class="fas fa-lock"></i>
-                        <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
-                    </div>
-                    <div class="error-message" id="confirmPasswordError"></div>
-                </div>
-                
-                <div class="terms-group">
-                    <input type="checkbox" id="termsAgree" required>
-                    <label for="termsAgree">
-                        I agree to the <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
-                    </label>
-                </div>
-                <div class="error-message" id="termsError">Please accept the terms and conditions</div>
-                
-                <div class="loading-spinner" id="loadingSpinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    <p>Creating your account...</p>
-                </div>
-                
-                <button type="submit" class="btn" id="registerBtn">
-                    Create Account
-                </button>
-                
-                <div class="login-link">
-                    Already have an account? <a href="login.html">Login here</a>
-                </div>
-            </form>
-        </div>
-        
-        <div class="copyright">
-            © 2025 AgriAI. All Rights Reserved.
-        </div>
-    </div>
-
-    <!-- Supabase Configuration and Initialization -->
-    <script>
-        // Supabase Configuration
-        const SUPABASE_URL = 'https://insukneerswqxrbvecql.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imluc3VrbmVlcnN3cXhyYnZlY3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MjQ1MjEsImV4cCI6MjA4MDQwMDUyMX0.2-1I54SEid6wLaKRCOLIysFdM__Sb-XQKlTGjwgJcQI';
-        
-        // Wait for Supabase library to load
-        function initializeSupabase() {
-            try {
-                if (typeof supabase !== 'undefined') {
-                    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                        auth: {
-                            autoRefreshToken: true,
-                            persistSession: true,
-                            detectSessionInUrl: true,
-                            storage: window.localStorage
-                        }
-                    });
-                    console.log('Supabase client initialized successfully');
-                    window.supabaseClient = client;
-                    return client;
-                } else {
-                    console.warn('Supabase library not loaded yet');
-                    return null;
-                }
-            } catch (error) {
-                console.error('Error initializing Supabase client:', error);
-                return null;
-            }
-        }
-        
-        // Initialize immediately if library is loaded
-        let supabaseClient = initializeSupabase();
-        
-        // If not loaded yet, set up an event listener
-        if (!supabaseClient) {
-            document.addEventListener('supabase-loaded', function() {
-                supabaseClient = initializeSupabase();
-                if (supabaseClient) {
-                    console.log('Supabase client initialized after loading');
-                }
-            });
-        }
-    </script>
     
     <script>
         document.addEventListener('DOMContentLoaded', async function() {
@@ -477,8 +437,8 @@
             const phonePattern = /^[6-9]\d{9}$/;
 
             // Wait for Supabase to be ready
-            await ensureSupabaseReady();
-
+            await waitForSupabase();
+            
             // Test Supabase connection
             await testSupabaseConnection();
 
@@ -621,29 +581,54 @@
                 strengthText.style.color = color;
             }
 
-            async function ensureSupabaseReady() {
+            async function waitForSupabase() {
                 // If supabaseClient is already initialized, return it
                 if (window.supabaseClient) {
+                    console.log('Supabase client already initialized');
                     return window.supabaseClient;
+                }
+                
+                // Try to initialize using the function from config file
+                if (typeof window.initializeSupabase === 'function') {
+                    const client = window.initializeSupabase();
+                    if (client) {
+                        console.log('Supabase initialized via initializeSupabase()');
+                        return client;
+                    }
                 }
                 
                 // Wait for supabase to load
                 return new Promise((resolve) => {
+                    console.log('Waiting for Supabase to load...');
                     const checkInterval = setInterval(() => {
                         if (window.supabaseClient) {
+                            console.log('Supabase client found');
                             clearInterval(checkInterval);
                             resolve(window.supabaseClient);
+                        } else if (typeof window.initializeSupabase === 'function') {
+                            const client = window.initializeSupabase();
+                            if (client) {
+                                console.log('Supabase initialized after waiting');
+                                clearInterval(checkInterval);
+                                resolve(client);
+                            }
                         } else if (typeof supabase !== 'undefined') {
-                            // Library is loaded but client not initialized
-                            const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                                auth: {
-                                    autoRefreshToken: true,
-                                    persistSession: true,
-                                    detectSessionInUrl: true,
-                                    storage: window.localStorage
+                            // Last resort: create directly
+                            console.log('Creating Supabase client directly');
+                            const client = supabase.createClient(
+                                'https://insukneerswqxrbvecql.supabase.co',
+                                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imluc3VrbmVlcnN3cXhyYnZlY3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MjQ1MjEsImV4cCI6MjA4MDQwMDUyMX0.2-1I54SEid6wLaKRCOLIysFdM__Sb-XQKlTGjwgJcQI',
+                                {
+                                    auth: {
+                                        autoRefreshToken: true,
+                                        persistSession: true,
+                                        detectSessionInUrl: true,
+                                        storage: window.localStorage
+                                    }
                                 }
-                            });
+                            );
                             window.supabaseClient = client;
+                            console.log('Supabase client created directly');
                             clearInterval(checkInterval);
                             resolve(client);
                         }
@@ -652,6 +637,7 @@
                     // Timeout after 5 seconds
                     setTimeout(() => {
                         clearInterval(checkInterval);
+                        console.error('Supabase initialization timeout');
                         showConnectionError('Failed to initialize database connection. Please refresh the page.');
                         resolve(null);
                     }, 5000);
@@ -659,17 +645,24 @@
             }
 
             async function testSupabaseConnection() {
-                const client = window.supabaseClient;
-                if (!client) {
+                if (!window.supabaseClient) {
                     showConnectionError('Database connection not available. Please refresh the page.');
                     return false;
                 }
 
                 try {
                     // Simple test - get current user session
-                    const { data, error } = await client.auth.getSession();
+                    const { data, error } = await window.supabaseClient.auth.getSession();
                     
-                    if (error) throw error;
+                    if (error) {
+                        // If it's just "no session", that's fine for registration
+                        if (error.message.includes('session') || error.status === 401) {
+                            console.log('No active session - this is normal for registration');
+                            hideConnectionError();
+                            return true;
+                        }
+                        throw error;
+                    }
                     
                     hideConnectionError();
                     return true;
@@ -705,13 +698,12 @@
                     hideConnectionError();
 
                     // Check if Supabase client is available
-                    const client = window.supabaseClient;
-                    if (!client) {
+                    if (!window.supabaseClient) {
                         throw new Error('Database connection not available.');
                     }
 
                     // Register user with Supabase Auth
-                    const { data: authData, error: authError } = await client.auth.signUp({
+                    const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
                         email: email,
                         password: password,
                         options: {
