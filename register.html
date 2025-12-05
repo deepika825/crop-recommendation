@@ -414,16 +414,52 @@
         </div>
     </div>
 
-    <!-- Include Supabase config first -->
-    <script src="supabase-config.js"></script>
-    
+    <!-- Supabase Configuration and Initialization -->
     <script>
-        // Supabase configuration (also in separate file)
+        // Supabase Configuration
         const SUPABASE_URL = 'https://insukneerswqxrbvecql.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imluc3VrbmVlcnN3cXhyYnZlY3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MjQ1MjEsImV4cCI6MjA4MDQwMDUyMX0.2-1I54SEid6wLaKRCOLIysFdM__Sb-XQKlTGjwgJcQI';
         
-        let supabaseClient = null;
-
+        // Wait for Supabase library to load
+        function initializeSupabase() {
+            try {
+                if (typeof supabase !== 'undefined') {
+                    const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                        auth: {
+                            autoRefreshToken: true,
+                            persistSession: true,
+                            detectSessionInUrl: true,
+                            storage: window.localStorage
+                        }
+                    });
+                    console.log('Supabase client initialized successfully');
+                    window.supabaseClient = client;
+                    return client;
+                } else {
+                    console.warn('Supabase library not loaded yet');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error initializing Supabase client:', error);
+                return null;
+            }
+        }
+        
+        // Initialize immediately if library is loaded
+        let supabaseClient = initializeSupabase();
+        
+        // If not loaded yet, set up an event listener
+        if (!supabaseClient) {
+            document.addEventListener('supabase-loaded', function() {
+                supabaseClient = initializeSupabase();
+                if (supabaseClient) {
+                    console.log('Supabase client initialized after loading');
+                }
+            });
+        }
+    </script>
+    
+    <script>
         document.addEventListener('DOMContentLoaded', async function() {
             const form = document.getElementById('registrationForm');
             const registerBtn = document.getElementById('registerBtn');
@@ -440,13 +476,11 @@
             // Phone pattern for Indian numbers
             const phonePattern = /^[6-9]\d{9}$/;
 
-            // Initialize Supabase client
-            await initializeSupabase();
+            // Wait for Supabase to be ready
+            await ensureSupabaseReady();
 
             // Test Supabase connection
-            if (supabaseClient) {
-                await testSupabaseConnection();
-            }
+            await testSupabaseConnection();
 
             // Form submission
             form.addEventListener('submit', async function(e) {
@@ -587,31 +621,21 @@
                 strengthText.style.color = color;
             }
 
-            async function initializeSupabase() {
-                try {
-                    // First check if supabase is available globally (from CDN)
-                    if (typeof supabase !== 'undefined') {
-                        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-                            auth: {
-                                autoRefreshToken: true,
-                                persistSession: true,
-                                detectSessionInUrl: true,
-                                storage: window.localStorage
-                            }
-                        });
-                        console.log('Supabase client initialized from CDN');
-                    }
-                    // Check if initialized from config file
-                    else if (window.supabaseClient) {
-                        supabaseClient = window.supabaseClient;
-                        console.log('Supabase client loaded from config file');
-                    }
-                    // Last resort: create directly
-                    else {
-                        console.log('Creating Supabase client directly');
-                        // This requires the Supabase CDN to be loaded (which it is in the head)
-                        if (typeof supabase !== 'undefined') {
-                            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            async function ensureSupabaseReady() {
+                // If supabaseClient is already initialized, return it
+                if (window.supabaseClient) {
+                    return window.supabaseClient;
+                }
+                
+                // Wait for supabase to load
+                return new Promise((resolve) => {
+                    const checkInterval = setInterval(() => {
+                        if (window.supabaseClient) {
+                            clearInterval(checkInterval);
+                            resolve(window.supabaseClient);
+                        } else if (typeof supabase !== 'undefined') {
+                            // Library is loaded but client not initialized
+                            const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
                                 auth: {
                                     autoRefreshToken: true,
                                     persistSession: true,
@@ -619,31 +643,31 @@
                                     storage: window.localStorage
                                 }
                             });
+                            window.supabaseClient = client;
+                            clearInterval(checkInterval);
+                            resolve(client);
                         }
-                    }
+                    }, 100);
                     
-                    if (!supabaseClient) {
-                        throw new Error('Failed to initialize Supabase client');
-                    }
-                    
-                    window.supabaseClient = supabaseClient;
-                    return true;
-                } catch (error) {
-                    console.error('Error initializing Supabase:', error);
-                    showConnectionError('Failed to initialize database connection. Please refresh the page.');
-                    return false;
-                }
+                    // Timeout after 5 seconds
+                    setTimeout(() => {
+                        clearInterval(checkInterval);
+                        showConnectionError('Failed to initialize database connection. Please refresh the page.');
+                        resolve(null);
+                    }, 5000);
+                });
             }
 
             async function testSupabaseConnection() {
-                if (!supabaseClient) {
-                    showConnectionError('Supabase client not initialized. Please refresh the page.');
+                const client = window.supabaseClient;
+                if (!client) {
+                    showConnectionError('Database connection not available. Please refresh the page.');
                     return false;
                 }
 
                 try {
                     // Simple test - get current user session
-                    const { data, error } = await supabaseClient.auth.getSession();
+                    const { data, error } = await client.auth.getSession();
                     
                     if (error) throw error;
                     
@@ -681,12 +705,13 @@
                     hideConnectionError();
 
                     // Check if Supabase client is available
-                    if (!supabaseClient) {
-                        throw new Error('Supabase client not initialized.');
+                    const client = window.supabaseClient;
+                    if (!client) {
+                        throw new Error('Database connection not available.');
                     }
 
                     // Register user with Supabase Auth
-                    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+                    const { data: authData, error: authError } = await client.auth.signUp({
                         email: email,
                         password: password,
                         options: {
@@ -728,6 +753,8 @@
                         errorMessage = 'Network error. Please check your internet connection.';
                     } else if (error.message.includes('signup_disabled')) {
                         errorMessage = 'New registrations are currently disabled.';
+                    } else if (error.message.includes('not available')) {
+                        errorMessage = 'Database connection lost. Please refresh and try again.';
                     }
                     
                     showError('emailError', errorMessage);
