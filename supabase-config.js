@@ -6,16 +6,23 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let supabase;
 
 try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-        auth: {
-            autoRefreshToken: true,
-            persistSession: true,
-            detectSessionInUrl: true,
-            storage: window.localStorage
-        }
-    });
-    console.log('Supabase client initialized successfully');
-    window.supabaseClient = supabase;
+    // Load Supabase client library if not already loaded
+    if (typeof window.supabase !== 'undefined') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+            auth: {
+                autoRefreshToken: true,
+                persistSession: true,
+                detectSessionInUrl: true,
+                storage: window.localStorage
+            }
+        });
+        console.log('Supabase client initialized successfully');
+        window.supabaseClient = supabase;
+    } else {
+        console.warn('Supabase library not loaded yet');
+        // Create a placeholder to be initialized later
+        window.supabaseClient = null;
+    }
 } catch (error) {
     console.error('Error initializing Supabase client:', error);
     window.supabaseClient = null;
