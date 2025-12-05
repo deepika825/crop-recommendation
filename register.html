@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgriAI - Register</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Load Supabase JS from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
             --primary-green: #2e7d32;
@@ -416,7 +418,13 @@
     <script src="supabase-config.js"></script>
     
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        // Supabase configuration (also in separate file)
+        const SUPABASE_URL = 'https://insukneerswqxrbvecql.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imluc3VrbmVlcnN3cXhyYnZlY3FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4MjQ1MjEsImV4cCI6MjA4MDQwMDUyMX0.2-1I54SEid6wLaKRCOLIysFdM__Sb-XQKlTGjwgJcQI';
+        
+        let supabaseClient = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
             const form = document.getElementById('registrationForm');
             const registerBtn = document.getElementById('registerBtn');
             const loadingSpinner = document.getElementById('loadingSpinner');
@@ -432,8 +440,13 @@
             // Phone pattern for Indian numbers
             const phonePattern = /^[6-9]\d{9}$/;
 
+            // Initialize Supabase client
+            await initializeSupabase();
+
             // Test Supabase connection
-            testSupabaseConnection();
+            if (supabaseClient) {
+                await testSupabaseConnection();
+            }
 
             // Form submission
             form.addEventListener('submit', async function(e) {
@@ -574,17 +587,63 @@
                 strengthText.style.color = color;
             }
 
+            async function initializeSupabase() {
+                try {
+                    // First check if supabase is available globally (from CDN)
+                    if (typeof supabase !== 'undefined') {
+                        supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                            auth: {
+                                autoRefreshToken: true,
+                                persistSession: true,
+                                detectSessionInUrl: true,
+                                storage: window.localStorage
+                            }
+                        });
+                        console.log('Supabase client initialized from CDN');
+                    }
+                    // Check if initialized from config file
+                    else if (window.supabaseClient) {
+                        supabaseClient = window.supabaseClient;
+                        console.log('Supabase client loaded from config file');
+                    }
+                    // Last resort: create directly
+                    else {
+                        console.log('Creating Supabase client directly');
+                        // This requires the Supabase CDN to be loaded (which it is in the head)
+                        if (typeof supabase !== 'undefined') {
+                            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+                                auth: {
+                                    autoRefreshToken: true,
+                                    persistSession: true,
+                                    detectSessionInUrl: true,
+                                    storage: window.localStorage
+                                }
+                            });
+                        }
+                    }
+                    
+                    if (!supabaseClient) {
+                        throw new Error('Failed to initialize Supabase client');
+                    }
+                    
+                    window.supabaseClient = supabaseClient;
+                    return true;
+                } catch (error) {
+                    console.error('Error initializing Supabase:', error);
+                    showConnectionError('Failed to initialize database connection. Please refresh the page.');
+                    return false;
+                }
+            }
+
             async function testSupabaseConnection() {
-                if (!window.supabaseClient) {
+                if (!supabaseClient) {
                     showConnectionError('Supabase client not initialized. Please refresh the page.');
                     return false;
                 }
 
                 try {
-                    const { data, error } = await window.supabaseClient
-                        .from('users')
-                        .select('count')
-                        .limit(1);
+                    // Simple test - get current user session
+                    const { data, error } = await supabaseClient.auth.getSession();
                     
                     if (error) throw error;
                     
@@ -600,10 +659,12 @@
             function showConnectionError(message) {
                 connectionError.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
                 connectionError.classList.add('show');
+                registerBtn.disabled = true;
             }
 
             function hideConnectionError() {
                 connectionError.classList.remove('show');
+                registerBtn.disabled = false;
             }
 
             async function registerUser() {
@@ -620,12 +681,12 @@
                     hideConnectionError();
 
                     // Check if Supabase client is available
-                    if (!window.supabaseClient) {
+                    if (!supabaseClient) {
                         throw new Error('Supabase client not initialized.');
                     }
 
                     // Register user with Supabase Auth
-                    const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+                    const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                         email: email,
                         password: password,
                         options: {
@@ -665,6 +726,8 @@
                         errorMessage = 'Configuration error. Please contact support.';
                     } else if (error.message.includes('network')) {
                         errorMessage = 'Network error. Please check your internet connection.';
+                    } else if (error.message.includes('signup_disabled')) {
+                        errorMessage = 'New registrations are currently disabled.';
                     }
                     
                     showError('emailError', errorMessage);
